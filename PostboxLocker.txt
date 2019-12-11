@@ -1,0 +1,375 @@
+#include <Servo.h>
+#include <Keypad.h> 
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial BTSerial(12,13);
+
+LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+//////////////////////////////키패드 기본설정//////////////////////////////
+const byte ROWS = 4; //four rows 
+const byte COLS = 4; //four columns 
+ 
+byte rowPins[ROWS] = {9, 8, 7, 6}; //connect to the row pinouts of the keypad 
+byte colPins[COLS] = {5, 4, 3, 2}; //connect to the column pinouts of the keypad 
+
+char keys[ROWS][COLS] = { 
+  {'1','2','3', 'A'}, 
+  {'4','5','6', 'B'}, 
+  {'7','8','9', 'C'}, 
+  {'*','0','#', 'D'} 
+}; 
+ 
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+
+//////////////////////////////각종 설정//////////////////////////////
+Servo servo;
+int buzzer=11;
+int doorpin = 13;
+int trigPin = A1;
+int echoPin = A2;
+int i=0; //키패드 누른 순서
+int j=5; //운송장번호 몇 자리 숫자인지 저장용
+int k=0; //기타 for루프용
+int phone = 0;
+int state=0; //0은 닫혔을 때, 1은 열렸을 때, 99는 비밀번호 확인상태
+char tracking_number[16]={'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'}; //운송장번호 최대 16자리 키패드 입력용
+char N[16]={'2','5','8','0','A','0','0','0','0','0','0','0','0','0','0','0'}; //운송장번호 어플입력값 저장용
+char ox[16]={'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o'}; //운송장번호와 키패드값 비교용
+
+
+//////////////////////////////보이드 셋업//////////////////////////////
+void setup(){ 
+  Serial.begin(9600); 
+  BTSerial.begin(9600);
+  servo.attach(10);
+  pinMode(buzzer,OUTPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  servo.write(0);
+  //pinMode(doorpin, INPUT_PULLUP);
+  
+
+  lcd.init(); // LCD 초기화  
+  lcd.backlight(); // LCD 백라이트를 켠다
+  lcd.clear(); // LCD 모든 내용 지움
+  lcd.print("Tracking_Number:"); //LCD 행1 글씨
+  lcd.setCursor(0,1); //행0 열1
+  lcd.print(tracking_number);//행0 열1부터 글씨
+
+} 
+
+//////////////////////////////보이드 루프//////////////////////////////
+
+void loop(){ 
+
+////////////////////////센서에 의한 open/close//////////////////////////////
+
+/*  if(digitalRead(13) == LOW){
+    servo.write(90);
+
+  } else if(digitalRead(13) == HIGH){
+    servo.write(0);
+  }
+  delay(500);
+ */
+ 
+/////////////////////////키패드에 의한 open/close////////////////////////////////////////////
+  char key = keypad.getKey(); //key의 값은 키패드에서 누른 값.
+   
+  if(key && state ==0){ 
+    analogWrite(buzzer,200);
+    if(i==0){
+      tracking_number[0]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==1){
+      tracking_number[1]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==2){
+      tracking_number[2]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number); 
+    }
+    else if(i==3){
+      tracking_number[3]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==4){
+      tracking_number[4]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==5){
+      tracking_number[5]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==6){
+      tracking_number[6]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==7){
+      tracking_number[7]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==8){
+      tracking_number[8]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==9){
+      tracking_number[9]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==10){
+      tracking_number[10]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==11){
+      tracking_number[11]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==12){
+      tracking_number[12]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==13){
+      tracking_number[13]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==14){
+      tracking_number[14]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    else if(i==15){
+      tracking_number[15]=key;
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+    if(i==j-1) state=99;   
+    i=i+1; 
+    delay(100);
+    analogWrite(buzzer,LOW);   
+  } 
+
+if(state==99)
+{
+  for(k=0; k<=j-1; k++){
+    if(tracking_number[k]==N[k]) ox[k]='o';
+    else ox[k]='x';
+  }
+  
+  if(ox[0]=='o' && ox[1]=='o' && ox[2]=='o' && ox[3]=='o' && ox[4]=='o' && ox[5]=='o' && ox[6]=='o' && ox[7]=='o' && ox[8]=='o' && ox[9]=='o' && ox[10]=='o' && ox[11]=='o' && ox[12]=='o' && ox[13]=='o' && ox[14]=='o' && ox[15]=='o')
+  {
+    servo.write(90);
+    Serial.println("Accepted!");
+    BTSerial.write("Closed?");
+    lcd.clear();
+    lcd.setCursor(4,0);
+    lcd.print("ACCEPTED");
+    i=0;
+    state=1;
+    for(k=0; k<16; k++) tracking_number[k]='-';
+
+           
+    analogWrite(buzzer,100);
+    delay(250);
+    analogWrite(buzzer,100);
+    delay(250);
+    analogWrite(buzzer,100);
+    delay(250);
+    analogWrite(buzzer,100);
+    delay(250);
+    analogWrite(buzzer,LOW);
+    delay(10000);
+ 
+   lcd.clear();
+   lcd.print("Tracking_Number:");
+   lcd.setCursor(0,1);
+   lcd.print(tracking_number);
+  }else{
+    Serial.println("Password Error!");
+    lcd.clear();
+    lcd.setCursor(1,0);
+    lcd.print("PASSWORD ERROR");
+    lcd.setCursor(3,1);
+    lcd.print("TRY  AGAIN");
+    i=0;
+    state=0;
+    for(k=0; k<16; k++) tracking_number[k]='-';
+     
+    analogWrite(buzzer,8000);
+    delay(1500);
+    analogWrite(buzzer,LOW);
+    delay(100);
+    
+   lcd.clear();
+   lcd.print("Tracking_Number:");
+   lcd.setCursor(0,1);
+   lcd.print(tracking_number);
+   }  
+ } 
+
+
+  if(key=='B' && state ==1){
+    servo.write(0);
+    state=0;
+    i=0;
+    Serial.println("Closed?");
+    lcd.clear();
+    lcd.setCursor(1,0);
+    lcd.print("KEYPAD LOCK!");
+    delay(1000);
+    for(k=0; k<16; k++) tracking_number[k]='-';
+    lcd.clear();
+    lcd.print("Tracking_Number:");
+    lcd.setCursor(0,1);
+    lcd.print(tracking_number);
+
+    
+
+
+ 
+ 
+  }
+
+
+
+
+
+//////////////스마트폰에 의한 open/close///////////////  
+  if(BTSerial.available())
+  { 
+    
+    int phone = BTSerial.read();
+
+    if (phone == 1)
+    {
+      Serial.println("1");
+      Serial.println("Closed!");
+      lcd.clear();
+      lcd.setCursor(1,0);
+      lcd.print("Application");
+      lcd.setCursor(11,1);
+      lcd.print("LOCK!");
+      servo.write(0);
+      state = 0;      
+      i=0;
+      for(k=0; k<16; k++) tracking_number[k]='-';
+    
+     delay(1000);
+     lcd.clear();
+     lcd.print("Tracking_Number:");
+     lcd.setCursor(0,1);
+     lcd.print(tracking_number);
+    }
+    
+    else if (phone == 2)
+    {
+      Serial.println("Open!");
+      lcd.clear();
+      lcd.setCursor(1,0);
+      lcd.print("Application");
+      lcd.setCursor(11,1);
+      lcd.print("OPEN!");
+      servo.write(90);      
+      state = 1;
+      analogWrite(buzzer,240);
+      delay(250);
+      analogWrite(buzzer,200);
+      delay(250);
+      analogWrite(buzzer,180);
+      delay(250);
+      analogWrite(buzzer,250);
+      delay(250);
+      analogWrite(buzzer,LOW);
+    
+      delay(1000);
+      lcd.clear();
+      lcd.print("Tracking_Number:");
+      lcd.setCursor(0,1);
+      lcd.print(tracking_number);
+    }
+
+    else if(phone == 'x') //운송장번호 초기화 버튼 누르면 j,N 초기화
+    {
+      j=0;
+      for(k=0; k<16; k++) N[k]='0'; 
+      }
+
+    else //운송장번호 받았을때
+    {
+      N[j]=phone;
+      j=j+1;
+     }
+   }
+
+  digitalWrite(trigPin, LOW);
+  digitalWrite(echoPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  unsigned long duration = pulseIn(echoPin, HIGH);
+  float distance = ( (float)(340*duration) / 10000) / 2;
+  
+  Serial.print(distance);
+  Serial.println("cm");
+
+  if(distance < 0)
+  {
+    BTSerial.write("Closed?");
+  }
+}
+
+
+ 

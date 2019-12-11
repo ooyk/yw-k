@@ -1,0 +1,61 @@
+#include <SoftwareSerial.h>
+#include <Stepper.h>
+SoftwareSerial BTSerial(2, 3);   
+
+ int stepsPerRevolution = 2048; 
+Stepper myStepper(stepsPerRevolution,11,9,10,8); 
+
+void setup() {  
+  Serial.begin(9600);
+  BTSerial.begin(9600);
+  myStepper.setSpeed(14); 
+}
+
+
+void loop() {
+
+  if (BTSerial.available()){    
+    int data = BTSerial.read();
+  if(data==6) { 
+    Serial.println("1");
+    delay(2000);
+       myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      
+  }else if(data==24) { 
+    Serial.println("2");
+    delay(2000);
+     myStepper.step(stepsPerRevolution);
+  }else if(data==30) { 
+    Serial.println("3");
+    delay(2000); 
+     myStepper.step(stepsPerRevolution);
+     myStepper.step(stepsPerRevolution);
+     myStepper.step(stepsPerRevolution);
+     myStepper.step(stepsPerRevolution);
+  }else if(data==96) { 
+    Serial.println("4");
+    delay(2000);
+     myStepper.step(stepsPerRevolution);
+  }else if(data==102) { 
+    Serial.println("5");
+   delay(2000);
+      myStepper.step(stepsPerRevolution);
+  }else if(data==120) { 
+    Serial.println("6");
+    delay(2000);
+      myStepper.step(stepsPerRevolution);
+      myStepper.step(stepsPerRevolution);
+      myStepper.step(stepsPerRevolution);
+      
+      delay(2000);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+      myStepper.step(-stepsPerRevolution);
+     
+  
+  }

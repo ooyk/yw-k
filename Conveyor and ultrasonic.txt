@@ -1,0 +1,41 @@
+
+#include <Stepper.h>
+#define STEPS 1024    // 한바퀴를 이루는 스텝 갯수 입력
+const int trigpin = 6;
+const int echopin = 7;
+long duration, distance; 
+Stepper stepper(STEPS, 8, 10, 9, 11);  // 고정자 권선 순서 설정
+void setup() {
+   Serial.begin(9600);
+  pinMode(trigpin, OUTPUT);
+  pinMode(echopin, INPUT);
+  stepper.setSpeed(16); // 회전 속도 지정
+}
+ 
+void loop() {
+ long duration, distance;
+  digitalWrite(trigpin, LOW);
+  digitalWrite(echopin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigpin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigpin, LOW);
+  
+  duration = pulseIn(echopin, HIGH);
+  distance = ((float)(340 * duration) / 10000) /2;
+  delay(10);
+  
+  Serial.print(distance);
+  Serial.println("cm");
+  delay(1000);
+
+  
+  if (distance > 3)
+  {
+   stepper.step(STEPS/2);
+  }
+  else if(distance < 3)
+  {
+    stepper.step(0);
+  }
+} 
